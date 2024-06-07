@@ -175,10 +175,14 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
     BestUnitName = getBestUnit()
 
     EquipUnit(BestUnitName)
-    for i, v in pairs(workspace.SubStuff_DONT_DELETE.StoryPods:GetChildren()) do
-        if not v.MatchDisplayPart:GetAttribute("MatchId") then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Detector.CFrame
-            break
+    findPod = true
+    while findPod and task.wait(1) do
+        for i, v in pairs(workspace.SubStuff_DONT_DELETE.StoryPods:GetChildren()) do
+            if not v.MatchDisplayPart:GetAttribute("MatchId") then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Detector.CFrame
+                findPod = false
+                break
+            end
         end
     end
 
