@@ -161,7 +161,7 @@ function findCommonValue(t1, t2)
     return nil
 end
 
-if game.PlaceId == 17017769292 then
+if game.PlaceId == 17764698696 then
     c,d = game:GetService("ReplicatedStorage").Remotes.FirstTimeSummon:InvokeServer()
     if c then
         for i = 1, 5 do
@@ -216,7 +216,7 @@ if game.PlaceId == 17017769292 then
     game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
 
     game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
-else
+elseif game.PlaceId == 17018663967 then
     -- In-Game
 
     -- Anti AFK
