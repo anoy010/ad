@@ -174,6 +174,13 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
     BestUnitName = getBestUnit()
 
     EquipUnit(BestUnitName)
+    for i, v in pairs(workspace.SubStuff_DONT_DELETE.StoryPods:GetChildren()) do
+        if not v.MatchDisplayPart:GetAttribute("MatchId") then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Detector.CFrame
+            break
+        end
+    end
+
     if game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()["Chapters"]["FooshaVillage_Chapter6"]["Unlocked"] then
         game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("CREATE_MATCH"))
         local ohString1 = Hash("CHANGE_MATCH_DATA")
