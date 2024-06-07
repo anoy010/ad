@@ -36,7 +36,7 @@ local function clearTextures(v)
         v.Material = "Plastic"
         v.Reflectance = 0
         v.TextureID = 10385902758728957
-    elseif v:IsA("SpecialMesh")  then
+    elseif v:IsA("SpecialMesh") then
         v.TextureId = 0
     elseif v:IsA("ShirtGraphic") then
         v.Graphic = 1
@@ -162,6 +162,7 @@ function findCommonValue(t1, t2)
 end
 
 if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
+    print("In Lobby")
     c,d = game:GetService("ReplicatedStorage").Remotes.FirstTimeSummon:InvokeServer()
     if c then
         for i = 1, 5 do
@@ -180,7 +181,7 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
         ["Difficulty"] = "Hard", -- Difficulty
         ["FriendsOnly"] = false,
         ["Chapter"] = "FooshaVillage_Infinite" -- Chapter/Story Mode
-        }   
+        }
         game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
         game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
     end
@@ -217,7 +218,7 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
 
     game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
 elseif game.PlaceId == 17018663967 then
-    -- In-Game
+    print("In-Game")
 
     -- Anti AFK
     game:GetService('Players').LocalPlayer.Idled:connect(function()
