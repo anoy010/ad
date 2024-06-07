@@ -161,6 +161,7 @@ function findCommonValue(t1, t2)
     return nil
 end
 
+task.wait(10)
 if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
     print("In Lobby")
     c,d = game:GetService("ReplicatedStorage").Remotes.FirstTimeSummon:InvokeServer()
