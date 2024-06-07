@@ -1,5 +1,3 @@
-_G.UnitName = "ZAdmiral Of Ice"
-
 repeat task.wait(.1) until game:IsLoaded()
 repeat task.wait(.5) until game:GetService("Players")
 repeat task.wait(.5) until game.Players.LocalPlayer
@@ -38,7 +36,7 @@ local function clearTextures(v)
         v.Material = "Plastic"
         v.Reflectance = 0
         v.TextureID = 10385902758728957
-    elseif v:IsA("SpecialMesh") then
+    elseif v:IsA("SpecialMesh")  then
         v.TextureId = 0
     elseif v:IsA("ShirtGraphic") then
         v.Graphic = 1
@@ -111,6 +109,27 @@ function GetYenCost(unitName)
 	return a[1][unitName][1]["Cost"]
 end
 
+function getBestUnit()
+	unitsDamages = {}
+	b = require(game:GetService("ReplicatedStorage").Modules.Bins.UnitData)
+	a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
+	for i,v in pairs(a.Units) do
+        if v.Type and b[v.Type] and b[v.Type]["Damage"] then
+		    table.insert(unitsDamages, b[v.Type]["Damage"], v.Type)
+        end
+	end
+
+    local highestIndex = nil
+    local highestValue = nil
+    for index, value in pairs(unitsDamages) do
+        if not highestIndex or index > highestIndex then
+            highestIndex = index
+            highestValue = value
+        end
+    end
+    return highestValue
+end
+
 function EquipUnit(unitName)
     a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
     for i, v in pairs(a["EquippedUnits"]) do
@@ -135,37 +154,6 @@ function CheckLevel(unitName)
     return a["Units"][GetUnitId(unitName)]["Level"]
 end
 
-function getBestUnit()
-	unitsDamages = {}
-	b = require(game:GetService("ReplicatedStorage").Modules.Bins.UnitData)
-	a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
-	for i,v in pairs(a.Units) do
-        if v.Type and b[v.Type] and b[v.Type]["Damage"] then
-		    table.insert(unitsDamages, b[v.Type]["Damage"], v.Type)
-        end
-	end
-
-    local highestIndex = nil
-    local highestValue = nil
-    for index, value in pairs(unitsDamages) do
-        if not highestIndex or index > highestIndex then
-            highestIndex = index
-            highestValue = value
-        end
-    end
-    return highestValue
-end
-
-function HasUnit(unitName)
-	a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
-	for i,v in pairs(a.Units) do
-		if v.Type == unitName then
-			return true
-		end
-	end
-	return false
-end
-
 function findCommonValue(t1, t2)
     local set = {}
     for _, v in ipairs(t1) do set[v] = true end
@@ -174,12 +162,28 @@ function findCommonValue(t1, t2)
 end
 
 if game.PlaceId == 17017769292 then
-	if HasUnit(_G.UnitName) then
-    	BestUnitName = _G.UnitName
-	else
-		BestUnitName = getBestUnit()
-	end
+    c,d = game:GetService("ReplicatedStorage").Remotes.FirstTimeSummon:InvokeServer()
+    if c then
+        for i = 1, 5 do
+            game:GetService("ReplicatedStorage").Remotes.Summon:InvokeServer("Standard", 1)
+            task.wait(.25)
+        end
+    end
+
+    BestUnitName = getBestUnit()
+
     EquipUnit(BestUnitName)
+    if game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()["Chapters"]["FooshaVillage_Chapter6"]["Unlocked"] then
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("CREATE_MATCH"))
+        local ohString1 = Hash("CHANGE_MATCH_DATA")
+        local ohTable2 = {
+        ["Difficulty"] = "Hard", -- Difficulty
+        ["FriendsOnly"] = false,
+        ["Chapter"] = "FooshaVillage_Infinite" -- Chapter/Story Mode
+        }   
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
+    end
 
     if CheckLevel(BestUnitName) < 25 then
         game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("CREATE_MATCH"))
@@ -193,16 +197,24 @@ if game.PlaceId == 17017769292 then
         game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
     end
 
+    a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
+    for i = 1, 6 do
+        if a["Chapters"]["FooshaVillage_Chapter" .. tostring(i)]["Unlocked"] then
+            CurrentLevel = i
+        end
+    end
+
     game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("CREATE_MATCH"))
 
     local ohString1 = Hash("CHANGE_MATCH_DATA")
     local ohTable2 = {
-    ["Difficulty"] = "Hard", -- Difficulty
+    ["Difficulty"] = "Normal", -- Difficulty
     ["FriendsOnly"] = false,
-    ["Chapter"] = "FooshaVillage_Infinite" -- Chapter/Story Mode
+    ["Chapter"] = "FooshaVillage_Chapter" .. tostring(CurrentLevel) -- Chapter/Story Mode
     }
 
     game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
+
     game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
 else
     -- In-Game
@@ -214,30 +226,28 @@ else
         game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
     end)
 
-	game:GetService("ReplicatedStorage").Actions.Action.OnClientEvent:Connect(function(name, val)
-		if deHash(name) == "WAVE_STARTED" then
-			if not _G.GameStarted then
-				_G.GameStarted = true
-			end
-			_G.WaveNumber = tonumber(val)
-		end
-	end)
-
     spawn(function()
         while task.wait(1) do
             game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("GAME_SKIPROUND"))
         end
     end)
 
-	_G.UnitsPlaced = false
+    _G.GameStarted = false
+    _G.GameEnded = false
+	game:GetService("ReplicatedStorage").Actions.Action.OnClientEvent:Connect(function(name, val)
+		if deHash(name) == "WAVE_STARTED" then
+			if not _G.GameStarted then
+				_G.GameStarted = true
+			end
+			_G.WaveNumber = tonumber(val)
+        elseif deHash(name) == "GAME_ENDED" then
+            _G.GameEnded = true
+		end
+	end)
 
     -- Upgrade
     spawn(function()
         while task.wait(1) do
-			if not _G.UnitsPlaced then
-				repeat task.wait() until _G.UnitsPlaced
-			end
-			
             for i, v in pairs(workspace.Units:GetChildren()) do
                 pcall(function()
                     if game.Players.LocalPlayer.leaderstats["Yen"].Value >= GetCost(v.Name, v:GetAttribute("CurrentUnitUpgradeStand")) then
@@ -252,11 +262,7 @@ else
         end
     end)
 
-	if HasUnit(_G.UnitName) then
-    	BestUnitName = _G.UnitName
-	else
-		BestUnitName = getBestUnit()
-	end
+    BestUnitName = getBestUnit()
     print("Best Unit: " .. tostring(BestUnitName))
 
     t1 = {}
@@ -274,69 +280,54 @@ else
     BestUnitID = findCommonValue(t1, t2)
 
     while task.wait() do
-		_G.UnitsPlaced = false
-
-        print("Waiting for Game to start")
-		repeat task.wait(1) until _G.GameStarted
-        print("Game Started.")
+        repeat task.wait(1) until _G.GameStarted
 
         repeat task.wait() until game.Players.LocalPlayer.leaderstats["Yen"].Value >= GetYenCost(BestUnitName)
-        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1669.8319091796875, 26.74508285522461, -529.0477294921875), 1)
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1675.22144, 26.9088078, -524.873901), 1)
         print("Placed Unit")
         task.wait(1)
 
         repeat task.wait() until game.Players.LocalPlayer.leaderstats["Yen"].Value >= GetYenCost(BestUnitName)
-        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1669.717529296875, 26.74508285522461, -535.437744140625), 1)
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1672.09839, 26.9088078, -540.491211), 1)
         print("Placed Unit")
         task.wait(1)
 
         repeat task.wait() until game.Players.LocalPlayer.leaderstats["Yen"].Value >= GetYenCost(BestUnitName)
-        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1663.3992919921875, 26.74508285522461, -529.29736328125), 1)
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1685.02722, 26.9088078, -539.519714), 1)
         print("Placed Unit")
         task.wait(1)
 
         repeat task.wait() until game.Players.LocalPlayer.leaderstats["Yen"].Value >= GetYenCost(BestUnitName)
-        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1663.2342529296875, 26.74508285522461, -535.806884765625), 1)
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1678.94946, 26.9088078, -539.70813), 1)
         print("Placed Unit")
         task.wait(1)
 
-		_G.UnitsPlaced = true
+        repeat task.wait() until game.Players.LocalPlayer.leaderstats["Yen"].Value >= GetYenCost(BestUnitName)
+        game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("UNIT_PLACE"), BestUnitID, Vector3.new(-1671.93054, 26.9088078, -523.550171), 1)
+        print("Placed Unit")
+        task.wait(1)
 
-        spawn(function()
-			repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES:FindFirstChild("MatchResultPage")
-            repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
+        successCheck = pcall(function()
+            repeat task.wait() until _G.GameEnded or game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
+            _G.GameEnded = false
             print("Game Ended..")
             task.wait(1)
 
             a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
-            print("Best Unit ID: ", tostring(BestUnitID))
-            for i,v in pairs(a["Units"][BestUnitID]) do
-                print(i,v)
-            end
             unitLevel = a["Units"][BestUnitID]["Level"]
 
             if unitLevel < 25 then
-                repeat
-                    click(game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Main.Options.ReplayButton)
-                    task.wait(1)
-                until not game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
+                game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("RESTART_GAME"))
             else
-                repeat
-                    game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("GAME_MODE_SELECTED_CTS"), "NormalLobby")
-                    task.wait(1)
-                until not game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
+                game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("GAME_MODE_SELECTED_CTS"), "NormalLobby")
             end
         end)
-		a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
-		unitLevel = a["Units"][BestUnitID]["Level"]
 
-		if unitLevel >= 25 then
-			repeat task.wait() until _G.WaveNumber >= 31
-			game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("GAME_MODE_SELECTED_CTS"), "NormalLobby")
-		else
-			repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES:FindFirstChild("MatchResultPage")
-            repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
-		end
-		_G.GameStarted = false
+        if not successCheck then
+            while task.wait(1) do
+                game:GetService("TeleportService"):Teleport(17017769292, game.Players.LocalPlayer)
+            end
+        end
+        _G.GameStarted = false
     end
 end
