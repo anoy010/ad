@@ -161,7 +161,7 @@ function findCommonValue(t1, t2)
     return nil
 end
 
-if game.PlaceId == 17764698696 then
+if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
     c,d = game:GetService("ReplicatedStorage").Remotes.FirstTimeSummon:InvokeServer()
     if c then
         for i = 1, 5 do
