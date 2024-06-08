@@ -116,6 +116,8 @@ function getBestUnit()
 	for i,v in pairs(a.Units) do
         if v.Type and b[v.Type] and b[v.Type]["Damage"] then
 		    table.insert(unitsDamages, b[v.Type]["Damage"], v.Type)
+        else
+            print("No Data Found for: ", v.Type)
         end
 	end
 
@@ -335,36 +337,21 @@ elseif game.PlaceId == 17018663967 and workspace:FindFirstChild("Units") then
         spawn(function()
             repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PAGES") and game:GetService("Players").LocalPlayer.PlayerGui.PAGES:FindFirstChild("MatchResultPage")
             repeat task.wait() until _G.GameEnded or game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
-            _G.GameEnded = false
             print("Game Ended..")
             task.wait(1)
-
-            a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
-            print("Best Unit ID: ", tostring(BestUnitID))
-            for i,v in pairs(a["Units"][BestUnitID]) do
-                print(i,v)
-            end
-            unitLevel = a["Units"][BestUnitID]["Level"]
-
-            if unitLevel < 25 then
-                game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("RESTART_GAME"))
-            else
+            while task.wait(1) do
                 game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("GAME_MODE_SELECTED_CTS"), "NormalLobby")
             end
         end)
 
         pcall(function()
-            a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
-            unitLevel = a["Units"][BestUnitID]["Level"]
-
-            if unitLevel >= 25 then
-                repeat task.wait() until _G.WaveNumber >= 31
+            repeat task.wait() until _G.WaveNumber >= 31
+            while task.wait(1) do
                 game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("GAME_MODE_SELECTED_CTS"), "NormalLobby")
-            else
-                repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES:FindFirstChild("MatchResultPage")
-                repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
             end
         end)
+        _G.GameEnded = false
         _G.GameStarted = false
+        _G.WaveNumber = 0
     end
 end
