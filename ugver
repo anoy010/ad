@@ -277,6 +277,17 @@ elseif game.PlaceId == 17018663967 and workspace:FindFirstChild("Units") then
         end
     end)
 
+    spawn(function()
+        task.wait(5) 
+        if game.PlaceId == 17764698696 then
+            --timer to kick player if stuck in the lobby (1min)
+            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
+        else
+            print("FARMING")
+            return 
+        end
+    end)
+
     BestUnitName = getBestUnit()
     print("Best Unit: " .. tostring(BestUnitName))
 
