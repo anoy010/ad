@@ -169,8 +169,9 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 or (game.PlaceId =
     if c then
         for i = 1, 5 do
             game:GetService("ReplicatedStorage").Remotes.Summon:InvokeServer("Standard", 1)
-            task.wait(.25)
+            task.wait(1)
         end
+        task.wait(5)
     end
 
     BestUnitName = getBestUnit()
