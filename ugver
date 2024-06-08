@@ -191,7 +191,7 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 or (game.PlaceId =
             local ohString1 = Hash("CHANGE_MATCH_DATA")
             local ohTable2 = {
             ["Difficulty"] = "Normal", -- Difficulty
-            ["FriendsOnly"] = false,
+            ["FriendsOnly"] = true,
             ["Chapter"] = "FooshaVillage_Chapter1" -- Chapter/Story Mode
             }
             game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
@@ -203,7 +203,7 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 or (game.PlaceId =
             local ohString1 = Hash("CHANGE_MATCH_DATA")
             local ohTable2 = {
             ["Difficulty"] = "Hard", -- Difficulty
-            ["FriendsOnly"] = false,
+            ["FriendsOnly"] = true,
             ["Chapter"] = "FooshaVillage_Infinite" -- Chapter/Story Mode
             }
             game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
@@ -222,7 +222,7 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 or (game.PlaceId =
         local ohString1 = Hash("CHANGE_MATCH_DATA")
         local ohTable2 = {
         ["Difficulty"] = "Normal", -- Difficulty
-        ["FriendsOnly"] = false,
+        ["FriendsOnly"] = true,
         ["Chapter"] = "FooshaVillage_Chapter" .. tostring(CurrentLevel) -- Chapter/Story Mode
         }
 
