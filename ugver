@@ -161,7 +161,6 @@ function findCommonValue(t1, t2)
     return nil
 end
 
-task.wait(10)
 if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 or (game.PlaceId == 17018663967 and not workspace:FindFirstChild("Units")) then
     print("In Lobby")
     c,d = game:GetService("ReplicatedStorage").Remotes.FirstTimeSummon:InvokeServer()
@@ -187,18 +186,6 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 or (game.PlaceId =
             end
         end
 
-        if game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()["Chapters"]["FooshaVillage_Chapter6"]["Unlocked"] then
-            game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("CREATE_MATCH"))
-            local ohString1 = Hash("CHANGE_MATCH_DATA")
-            local ohTable2 = {
-            ["Difficulty"] = "Hard", -- Difficulty
-            ["FriendsOnly"] = false,
-            ["Chapter"] = "FooshaVillage_Infinite" -- Chapter/Story Mode
-            }
-            game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
-            game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
-        end
-
         if CheckLevel(BestUnitName) < 25 then
             game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("CREATE_MATCH"))
             local ohString1 = Hash("CHANGE_MATCH_DATA")
@@ -206,6 +193,18 @@ if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 or (game.PlaceId =
             ["Difficulty"] = "Normal", -- Difficulty
             ["FriendsOnly"] = false,
             ["Chapter"] = "FooshaVillage_Chapter1" -- Chapter/Story Mode
+            }
+            game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
+            game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
+        end
+
+        if game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()["Chapters"]["FooshaVillage_Chapter6"]["Unlocked"] then
+            game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("CREATE_MATCH"))
+            local ohString1 = Hash("CHANGE_MATCH_DATA")
+            local ohTable2 = {
+            ["Difficulty"] = "Hard", -- Difficulty
+            ["FriendsOnly"] = false,
+            ["Chapter"] = "FooshaVillage_Infinite" -- Chapter/Story Mode
             }
             game:GetService("ReplicatedStorage").Actions.Action:FireServer(ohString1, ohTable2)
             game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("START_MATCH"))
@@ -279,7 +278,7 @@ elseif game.PlaceId == 17018663967 and workspace:FindFirstChild("Units") then
 
     spawn(function()
         task.wait(5) 
-        if game.PlaceId == 17764698696 then
+        if game.PlaceId == 17764698696 or game.PlaceId == 17017769292 then
             --timer to kick player if stuck in the lobby (1min)
             game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game.Players.LocalPlayer)
         else
@@ -333,13 +332,18 @@ elseif game.PlaceId == 17018663967 and workspace:FindFirstChild("Units") then
         print("Placed Unit")
         task.wait(1)
 
-        successCheck = pcall(function()
+        spawn(function()
+            repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("PAGES") and game:GetService("Players").LocalPlayer.PlayerGui.PAGES:FindFirstChild("MatchResultPage")
             repeat task.wait() until _G.GameEnded or game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
             _G.GameEnded = false
             print("Game Ended..")
             task.wait(1)
 
             a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
+            print("Best Unit ID: ", tostring(BestUnitID))
+            for i,v in pairs(a["Units"][BestUnitID]) do
+                print(i,v)
+            end
             unitLevel = a["Units"][BestUnitID]["Level"]
 
             if unitLevel < 25 then
@@ -349,11 +353,18 @@ elseif game.PlaceId == 17018663967 and workspace:FindFirstChild("Units") then
             end
         end)
 
-        if not successCheck then
-            while task.wait(1) do
-                game:GetService("TeleportService"):Teleport(17017769292, game.Players.LocalPlayer)
+        pcall(function()
+            a = game:GetService("ReplicatedStorage").Remotes.GetInventory:InvokeServer()
+            unitLevel = a["Units"][BestUnitID]["Level"]
+
+            if unitLevel >= 25 then
+                repeat task.wait() until _G.WaveNumber >= 31
+                game:GetService("ReplicatedStorage").Actions.Action:FireServer(Hash("GAME_MODE_SELECTED_CTS"), "NormalLobby")
+            else
+                repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES:FindFirstChild("MatchResultPage")
+                repeat task.wait() until game:GetService("Players").LocalPlayer.PlayerGui.PAGES.MatchResultPage.Visible
             end
-        end
+        end)
         _G.GameStarted = false
     end
 end
