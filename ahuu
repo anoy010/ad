@@ -184,4 +184,5 @@ getgenv().Config = {
 	},
 	["BoostFPS"] = true
 }
+_G.Key = "4cbbc2dc649ccc3e448b25ea4da245469788585a9bbccf6f941277834a7f8a37"
 loadstring(game:HttpGet("https://nousigi.com/loader.lua"))()
